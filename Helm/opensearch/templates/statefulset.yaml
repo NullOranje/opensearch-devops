@@ -29,7 +29,7 @@ spec:
   {{- if .Values.logPersistence.enabled }}
   - metadata:
       name: logs
-    {{ - if .Values.logPersistence.labels.enabled }}
+    {{- if .Values.logPersistence.labels.enabled }}
       labels:
         release: {{ .Release.Name | quote }}
         chart: "{{ .Chart.Name }}"
