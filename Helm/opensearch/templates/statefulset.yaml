@@ -36,6 +36,7 @@ spec:
         app: "{{ template "opensearch.uname" . }}"
         {{- range $key, $value := .Values.labels }}
         {{ $key }}: {{ $value | quote }}
+        {{- end }}
     {{- end }}
     spec:
       accessModes:
