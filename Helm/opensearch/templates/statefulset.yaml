@@ -26,6 +26,33 @@ spec:
     type: {{ .Values.updateStrategy }}
   {{- if .Values.persistence.enabled }}
   volumeClaimTemplates:
+  {{- if .Values.logPersistence.enabled }}
+  - metadata:
+      name: logs
+    {{ - if .Values.logPersistence.labels.enabled }}
+      labels:
+        release: {{ .Release.Name | quote }}
+        chart: "{{ .Chart.Name }}"
+        app: "{{ template "opensearch.uname" . }}"
+        {{- range $key, $value := .Values.labels }}
+        {{ $key }}: {{ $value | quote }}
+    {{- end }}
+    spec:
+      accessModes:
+      {{- range .Values.logPersistence.accessModes }}
+        - {{ . | quote }}
+      {{- end }}
+      resources:
+        requests:
+          storage: {{ .Values.logPersistence.size | quote }}
+    {{- if .Values.logPersistence.storageClass }}
+    {{- if (eq "-" .Values.logPersistence.storageClass) }}
+      storageClassName: ""
+    {{- else }}
+      storageClassName: "{{ .Values.logPersistence.storageClass }}"
+    {{- end }}
+    {{- end }}
+  {{- end }}
   - metadata:
       name: {{ template "opensearch.uname" . }}
     {{- if .Values.persistence.labels.enabled }}
@@ -316,6 +343,10 @@ spec:
           {{- if .Values.persistence.enabled }}
           - name: "{{ template "opensearch.uname" . }}"
             mountPath: {{ .Values.opensearchHome }}/data
+          {{- end }}
+          {{- if .Values.logPersistence.enabled }}
+          - name: logs
+            mountPath: {{ .Values.opensearchHome }}/logs
           {{- end }}
           {{- if .Values.keystore }}
           - name: keystore
